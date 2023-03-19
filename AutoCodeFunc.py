@@ -29,15 +29,16 @@ class StartAutomation(AutomationSetting.Automation):
         self.logger.debug("この商品を発送します : " + self.get_log_url())
 
         # お届け先を選択しドラッグ→コピー
-        self.image_locate_click('./image/otodokesaki.png')
+        self.image_locate_click('../../image/otodokesaki.png')
+        self.image_locate_click('../../image/otodokesaki.png')
         time.sleep(1)
 
         pgui.dragTo(x=self.get_window_size_x(set.dragToAddressX),
                     y=self.get_window_size_y(set.dragToAddressY), duration=0.5)
         pgui.hotkey('ctrl', 'c')
 
-        if self.image_locate_click('./image/snap.png') or \
-            self.image_locate_click('./image/snap_write.png'):
+        if self.image_locate_click('../../image/snap.png') or \
+            self.image_locate_click('../../image/snap_write.png'):
             
             self.printing_process()
             self.choice_printing()
@@ -47,10 +48,10 @@ class StartAutomation(AutomationSetting.Automation):
             return
 
         # 商品の発送を通知する
-        self.image_locate_click('./image/hassouwotuutisuru.png')
+        self.image_locate_click('../../image/hassouwotuutisuru.png')
         time.sleep(0.2)
 
-        self.image_locate_click('./image/hontounihassousimasitaka.png')
+        self.image_locate_click('../../image/hontounihassousimasitaka.png')
         # 次の出品までのリードタイム
         time.sleep(5.0)
         pgui.hotkey('ctrl', 'w')
@@ -66,7 +67,20 @@ class StartAutomation(AutomationSetting.Automation):
 
         # 画像ありで再出品
         self.re_listed_with_image()
-        time.sleep(10)
+        time.sleep(6)
+
+        # らくらくメルカリ便に変更される障害に対応するため、発送方法を普通郵便に変更する
+        pgui.press('pagedown', presses=2)
+        time.sleep(0.5)
+        self.image_locate_click('../../image/henkousuru.png')
+        time.sleep(0.5)
+        pgui.press('end')
+        time.sleep(1)
+        
+        self.image_locate_click('../../image/hutuuyuubin.png')
+        self.image_locate_click('../../image/kousinsuru.png')
+
+        time.sleep(3)
 
         pgui.press('end')
         time.sleep(2)
@@ -75,16 +89,16 @@ class StartAutomation(AutomationSetting.Automation):
         time.sleep(5)
 
         # 出品できているかの処理
-        self.check_page('./image/check_relisted.png')
+        self.check_page('../../image/check_relisted.png')
 
         # 出品ができていた場合コメントをする
-        if self.check_page('./image/check_relisted.png') == True:
+        if self.check_page('../../image/check_relisted.png') == True:
 
             self.comment_product()
             self.page_back()
             time.sleep(6)
 
-            self.check_page('./image/syouhinnnohensyuu.png')
+            self.check_page('../../image/syouhinnnohensyuu.png')
             self.edit_products_click()
             time.sleep(5)
 
@@ -95,7 +109,8 @@ class StartAutomation(AutomationSetting.Automation):
             pgui.hotkey('ctrl', 'w')
             time.sleep(5)
         else:
-            for _ in range(3):
+
+            for _ in range(5):
                 pgui.hotkey('alt', 'left')
             time.sleep(5)
 
@@ -116,7 +131,20 @@ class StartAutomation(AutomationSetting.Automation):
 
         # 画像ありで再出品
         self.re_listed_with_image()
-        time.sleep(10)
+        time.sleep(6)
+
+        # らくらくメルカリ便に変更される障害に対応するため、発送方法を普通郵便に変更する
+        pgui.press('pagedown', presses=2)
+        time.sleep(0.5)
+        self.image_locate_click('../../image/henkousuru.png')
+        time.sleep(0.5)
+        pgui.press('end')
+        time.sleep(1)
+
+        self.image_locate_click('../../image/hutuuyuubin.png')
+        self.image_locate_click('../../image/kousinsuru.png')
+
+        time.sleep(3)
 
         pgui.press('end')
         time.sleep(2)
@@ -125,14 +153,14 @@ class StartAutomation(AutomationSetting.Automation):
         time.sleep(5)
 
         # 出品できているかの処理
-        self.check_page('./image/check_relisted.png')
+        self.check_page('../../image/check_relisted.png')
 
         # 出品ができていた場合コメントをする
-        if self.check_page('./image/check_relisted.png') == True:
+        if self.check_page('../../image/check_relisted.png') == True:
             self.comment_product()
             pgui.hotkey('ctrl', 'w')
         else:
-            for _ in range(3):
+            for _ in range(5):
                 pgui.hotkey('alt', 'left')
             time.sleep(5)
 
@@ -157,7 +185,7 @@ class StartAutomation(AutomationSetting.Automation):
         pgui.press('end')
         time.sleep(2)
 
-        self.image_locate_click('./image/hanbaikakaku.png')
+        self.image_locate_click('../../image/hanbaikakaku.png')
         pgui.press('end')
         pgui.write('0')
         pgui.press('enter')
@@ -169,7 +197,7 @@ class StartAutomation(AutomationSetting.Automation):
         pgui.press('end')
         time.sleep(2)
 
-        self.image_locate_click('./image/hanbaikakaku.png')
+        self.image_locate_click('../../image/hanbaikakaku.png')
         pgui.press('end')
         pgui.press('backspace')
         pgui.press('enter')
@@ -214,8 +242,6 @@ class StartAutomation(AutomationSetting.Automation):
                         # 実施するメソッドの辞書名とmainメソッド内の辞書名が同じだったとき
                         if dict_name == dict_k:
                             dict_v()
-                        else:
-                            raise pgui.alert(text='プログラム名に誤りがあります。\n正しく選択してください。', title='名称エラー', button='OK')
                     page_count += 1
                 else:
                     pgui.alert(text='数字を入力してください', title='エラー', button='OK')

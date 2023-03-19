@@ -1,2 +1,1 @@
-# mercariApp
-Only some users
+# AutomationMercari

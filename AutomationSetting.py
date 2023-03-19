@@ -12,6 +12,11 @@ class Automation(object):
         self.window_size_x, self.window_size_y = pgui.size()
         pgui.FAILSAFE = True
 
+        # インストール済みのTesseractへパスを通す
+        path_tesseract = "C:\\Program Files\\Tesseract-OCR"
+        if path_tesseract not in os.environ["PATH"].split(os.pathsep):
+            os.environ["PATH"] += os.pathsep + path_tesseract
+
         # log.txtがなかったら作成する。
         folder_name = "log"
         file_name = "log.txt"
@@ -26,11 +31,14 @@ class Automation(object):
         # ログを設定する
         self.logger = getLogger(__name__)
 
+        # ------------------------------------------------------
         # コンソールに表示する場合は StreamHandler() を使う
         handler = StreamHandler()
+        # ------------------------------------------------------
 
         # ログファイルがあることを確認してそこに書き込む
         # handler = FileHandler("./log/log.txt")
+
 
         handler.setLevel(DEBUG)
         self.logger.setLevel(DEBUG)
@@ -113,7 +121,7 @@ class Automation(object):
 
         # 画像ありコピーが見つかるまで再読み込みする
         while(True):
-            locate : tuple = pgui.locateOnScreen('./image/mercari_copy.png', grayscale=True, confidence=0.7)
+            locate : tuple = pgui.locateOnScreen('../../image/mercari_copy.png', grayscale=True, confidence=0.7)
 
             # 画像が認識できなかったとき、再度読み込みをする
             self.reloading_page(locate)
@@ -146,9 +154,9 @@ class Automation(object):
         Returns:
             tuple :「出品する」の座標を返す。
         """
-        return self.image_locate_click('./image/syuppinsuru.png')
+        return self.image_locate_click('../../image/syuppinsuru.png')
 
-    def check_page(self, image_path: str) -> bool:
+    def check_page(self, image_path:str) -> bool:
         """_summary_
 
         再出品後に画面遷移が実際にできているか確認する
@@ -163,10 +171,13 @@ class Automation(object):
         """_summary_
 
         再出品完了後元の商品ページに戻る。
-        ログを取るためにURLを参照して置換したほうがミスがなくなるかもしれないので要検討
+        
+        2023/03/14
+        らくらくメルカリ便への変更対応
 
         """
-        for _ in range(5):
+
+        for _ in range(7):
             pgui.hotkey('alt', 'left')
 
     # 商品の編集を選択する
@@ -182,7 +193,7 @@ class Automation(object):
 
         # 商品を編集するが見つかるまで再読み込みする
         while(True):
-            locate: tuple = pgui.locateOnScreen('./image/syouhinnnohensyuu.png', grayscale=True, confidence=0.7)
+            locate: tuple = pgui.locateOnScreen('../../image/syouhinnnohensyuu.png', grayscale=True, confidence=0.7)
 
             reload_count: int = 0
 
@@ -205,10 +216,10 @@ class Automation(object):
         商品編集画面で削除ボタンを押す。
 
         """
-        self.image_locate_click('./image/konosyouhinwosakujosuru.png')
+        self.image_locate_click('../../image/konosyouhinwosakujosuru.png')
         time.sleep(1)
 
-        self.image_locate_click('./image/sakujosuru.png')
+        self.image_locate_click('../../image/sakujosuru.png')
         time.sleep(2)
 
     def go_page(self) -> None:
@@ -260,22 +271,24 @@ class Automation(object):
 
         Returns:
             bool: 売れていたらTrueを返す。
+            
         """
-        if pgui.locateOnScreen('./image/check_relisted.png', grayscale=True, confidence=0.7):
+        if pgui.locateOnScreen('../../image/check_relisted.png', grayscale=True, confidence=0.7):
             return True
 
     def comment_product(self) -> None:
         """_summary_
 
         出品した商品に注意書きをコメントする。
+
         """
-        self.image_locate_click('./image/syuppinnsyouhinwomiru.png')
+        self.image_locate_click('../../image/syuppinnsyouhinwomiru.png')
         time.sleep(2)
 
-        self.image_locate_click('./image/komentowonyuuryoku.png')
+        self.image_locate_click('../../image/komentowonyuuryoku.png')
         time.sleep(3)
 
-        self.image_locate_click('./image/komentoran.png')
+        self.image_locate_click('../../image/komentoran.png')
         time.sleep(1)
 
         # 設定ファイルに記載されているコメントを貼り付ける
@@ -306,5 +319,5 @@ class Automation(object):
         印刷するアイコンを選択する。
 
         """
-        self.image_locate_click('./image/insatu.png')
+        self.image_locate_click('../../image/insatu.png')
         time.sleep(1)
