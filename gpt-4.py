@@ -1,3 +1,4 @@
+from logging import getLogger, StreamHandler, DEBUG, Formatter, FileHandler
 from PIL import Image
 import os
 import pyocr
@@ -12,6 +13,35 @@ if path_tesseract not in os.environ["PATH"].split(os.pathsep):
 # OCRエンジンの取得
 tools = pyocr.get_available_tools()
 tool = tools[0]
+
+# log.txtがなかったら作成する。
+folder_name = "log"
+file_name = "log.txt"
+file_path = os.path.join(folder_name, file_name)
+if not os.path.exists(file_path):
+    os.makedirs(folder_name, exist_ok=True)
+    with open(file_path, "w") as file:
+        pass
+else:
+    pass
+
+# ログを設定する
+logger = getLogger(__name__)
+
+# コンソールに表示する場合は StreamHandler() を使う
+handler = StreamHandler()
+
+# ログファイルがあることを確認してそこに書き込む
+# handler = FileHandler("./log/log.txt")
+
+handler.setLevel(DEBUG)
+logger.setLevel(DEBUG)
+for h in logger.handlers[:]:
+    logger.removeHandler(h)
+    h.close()
+logger.addHandler(handler)
+formatter = Formatter('%(asctime)s - %(filename)s - %(funcName)s - %(message)s')
+handler.setFormatter(formatter)
 
 # 画面サイズを取得する
 width, height = pgui.size()

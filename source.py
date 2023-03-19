@@ -1,14 +1,23 @@
 import os
 import time
-import Setting as set
+import pyocr
+import pyocr.builders
 import pyautogui as pgui
-import pyperclip as pyper
 
+from PIL import Image
 from logging import getLogger, StreamHandler, DEBUG, Formatter, FileHandler
 
 class Automation(object):
-    def __init__(self) -> None:
+    def __init__(self):
+        self.path_tesseract = "C:\\Program Files\\Tesseract-OCR"
+        self.width, self.height = pgui.size()
+        if self.path_tesseract not in os.environ["PATH"].split(os.pathsep):
+            os.environ["PATH"] += os.pathsep + self.path_tesseract
+        self.tools = pyocr.get_available_tools()
+        self.tool = self.tools[0]
+        self.configure_logger()
 
+    def configure_logger(self):
         # log.txtがなかったら作成する。
         folder_name = "log"
         file_name = "log.txt"
@@ -38,120 +47,76 @@ class Automation(object):
         formatter = Formatter('%(asctime)s - %(filename)s - %(funcName)s - %(message)s')
         handler.setFormatter(formatter)
 
+    def calculate_screen_ratio(self) -> tuple:
+        # 画面サイズを取得する
+        width, height = pgui.size()
+        return width / 3840, height / 2160
+    
+    def capture_screenshot(self) -> str:
+        screenshot_path = "./image/screenshot.png"
+        pgui.screenshot(screenshot_path)
+        return screenshot_path
+    
+    def image_ocr(self, path: str, target_str: str, left: int, upper: int, right: int, lower: int) -> tuple:
+        x, y = self.calculate_screen_ratio()
+        img_org = Image.open(path)
+        img_gray = img_org.convert("L")
+        img_crop = img_gray.crop((left * x, upper * y, right * x, lower * y))
 
-    def get_product_url(self) -> str:
+        # 本番ではsaveしなくていい
+        img_crop.save("./image/screenshot_gray.png")
+        builder = pyocr.builders.WordBoxBuilder(tesseract_layout=6)
+        result = self.tool.image_to_string(img_crop, lang="jpn", builder=builder)
+
+        for line in result:
+            if target_str in line.content:
+                print(f"{target_str}の座標は、", line.position[0])
+                return line.position[0]
+        return None
+
+    def locate_click(self, box: tuple):
+        if box is not None:
+            pgui.click(box)
+        else:
+            print("座標が見つかりませんでした。")
+
+    def window_size_check(self, original_image: str):
         """_summary_
 
-        ログ記載用のURLを取得する。
+        画面解像度が3840x2160のとき、元からある画像を参照する
+        Args:
+            original_image (str): _description_
 
         Returns:
-            element : 現在のURL
-
+            _type_: _description_
         """
-        pgui.hotkey("ctrl", "l")
-        pgui.hotkey("ctrl", "c")
-
-        element = pyper.paste()
-        return element
+        if self.width == 3840 and self.height == 2160:
+            img_path = original_image
+        else:
+            img_path = self.capture_screenshot()
+        
+        return img_path
     
 
-    def reloading_page(self, is_image:str) -> None:
-        """_summary_
+if __name__ == "__main__":
+    screen_reader = Automation()
 
-        指定した画像が読み込めなかったときリロードする。
-        2023/03/14
-        ここを少し変えたい
-            無限にリロードする可能性があるので、例外処理として別で組み込めないか？
+    pgui.hotkey('alt', 'tab')
+    pgui.alert()
 
-        Args:
-            is_image (str): 指定した画像のPATH
+    target_str = "あり"
+    left, upper, right, lower = 670, 1740, 1530, 1940
 
-        """
-        if is_image == None:
-            pgui.press('F5')
-            self.logger.debug("画像が読み込めないためリロードします。")
-            time.sleep(10)
+    if screen_reader.width == 3840 and screen_reader.height == 2160:
+        img_path = "./image/image_test.png"
+    else:
+        img_path = screen_reader.capture_screenshot()
 
+    result = screen_reader.image_ocr(img_path, target_str, left, upper, right, lower)
+    x, y = screen_reader.calculate_screen_ratio()
 
-    def image_locate_click(self, image_path: str) -> tuple:
-        """_summary_
-
-        Webページ内に該当する画像を認識し、その座標をクリックする。
-
-        Args:
-            image_path (str): 指定した画像のPATH
-
-        Returns:
-            tuple: 画像の座標
-
-        """
-
-        locate = pgui.locateOnScreen(image_path, grayscale=True, confidence=0.7)
-
-        if locate == None:
-            raise pgui.ImageNotFoundException
-        
-        pgui.click(locate, duration=0.5)
-        return locate
-
-
-    def re_listed_with_image(self) -> tuple:
-        """_summary_
-
-        画像あり再出品をする。
-        画像が読み込めなかったときはリロードする。
-
-        3回連続で読み込めないときは、次のページへ移動する。
-        5回連続で読み込めないときは、商品が再出品できる状態ではないと判断して処理を終了する。
-
-        Returns:
-            locate : 画像あり再出品の座標を返す。
-
-        Raise:
-            ImageNotFoundException : 画像が見つからない
-
-        """
-
-        reload_count : int = 0
-        none_page_count : int = 0
-
-        # 画像ありコピーが見つかるまで再読み込みする
-        while(True):
-            locate : tuple = pgui.locateOnScreen('../../image/mercari_copy.png', grayscale=True, confidence=0.7)
-
-            # 画像が認識できなかったとき、再度読み込みをする
-            self.reloading_page(locate)
-
-            # 読み込み回数をカウント
-            reload_count += 1
-            
-            if locate != None:
-                break
-
-            if reload_count > 3:
-                reload_count = None
-                none_page_count += 1
-                pgui.hotkey('ctrl', 'w')
-                self.logger.debug("3回読み込めなかったので次のタブへ移動します。")
-
-            if none_page_count > 5:
-                self.logger.error("再出品可能な状態ではありません。処理を強制終了します。")
-                self.logger.error("ImageNotFoundException")
-                raise pgui.ImageNotFoundException
-        
-        self.logger.debug("この商品を再出品します : " + self.get_log_url())
-
-        pgui.click(locate, duration=0.5)
-        return locate
-    
-
-    def button_click_listing(self) -> tuple:
-        """_summary_
-
-        出品するを選択する
-
-        Returns:
-            tuple :「出品する」の座標を返す。
-
-        """
-        return self.image_locate_click('../../image/syuppinsuru.png')
+    if result is not None:
+        new_tup = (result[0] + (left * x), result[1] + (upper * y))
+        screen_reader.locate_click(new_tup)
+    else:
+        screen_reader.logger.debug("座標が見つかりません")
