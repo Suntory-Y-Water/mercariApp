@@ -9,13 +9,6 @@ class StartAutomation(AutomationSetting.Automation):
         super().__init__()
         pgui.FAILSAFE = True
 
-        """実行プログラムにのみ実装
-
-        Raises:
-            FailSafeException : フェイルセーフ発動時
-        """        
-
-
     def automatic_shipping(self) -> None:
         """_summary_
 
@@ -33,8 +26,8 @@ class StartAutomation(AutomationSetting.Automation):
         self.image_locate_click('../../image/otodokesaki.png')
         time.sleep(1)
 
-        pgui.dragTo(x=self.get_window_size_x(set.dragToAddressX),
-                    y=self.get_window_size_y(set.dragToAddressY), duration=0.5)
+        pgui.dragTo(x=self.width(set.dragToAddressX),
+                    y=self.height(set.dragToAddressY), duration=0.5)
         pgui.hotkey('ctrl', 'c')
 
         if self.image_locate_click('../../image/snap.png') or \
@@ -57,30 +50,22 @@ class StartAutomation(AutomationSetting.Automation):
         pgui.hotkey('ctrl', 'w')
 
 
-    def automatic_listing(self) -> None:
+    def automatic_listing(self, do_not_delete_flag: int = 0) -> None:
         """_summary_
-
+        
         自動再出品
         再出品をして出品後にコメントをし元の商品を削除する。
 
+        Args:
+            do_not_delete_flag (int, optional): _description_. Defaults to 0.
         """
+        if do_not_delete_flag == 1:
+            # 商品ページへ移動
+            self.go_product_page()          
 
         # 画像ありで再出品
-        self.re_listed_with_image()
+        self.image_path_click(image_path='../../image/mercari_copy.png', log_flag=1)
         time.sleep(6)
-
-        # らくらくメルカリ便に変更される障害に対応するため、発送方法を普通郵便に変更する
-        pgui.press('pagedown', presses=2)
-        time.sleep(0.5)
-        self.image_locate_click('../../image/henkousuru.png')
-        time.sleep(0.5)
-        pgui.press('end')
-        time.sleep(1)
-        
-        self.image_locate_click('../../image/hutuuyuubin.png')
-        self.image_locate_click('../../image/kousinsuru.png')
-
-        time.sleep(3)
 
         pgui.press('end')
         time.sleep(2)
@@ -88,18 +73,21 @@ class StartAutomation(AutomationSetting.Automation):
         self.button_click_listing()
         time.sleep(5)
 
-        # 出品できているかの処理
-        self.check_page('../../image/check_relisted.png')
-
-        # 出品ができていた場合コメントをする
+        # 出品ができていた場合
         if self.check_page('../../image/check_relisted.png') == True:
-
+            
+            # コメントで注意書きをする
             self.comment_product()
-            self.page_back()
+
+            # フラグ時はそのままページを閉じる
+            if do_not_delete_flag == 1:
+                pgui.hotkey('ctrl', 'w')
+                return
+            
+            self.page_back(count=8)
             time.sleep(6)
 
-            self.check_page('../../image/syouhinnnohensyuu.png')
-            self.edit_products_click()
+            self.image_path_click(image_path='../../image/syouhinnnohensyuu.png')
             time.sleep(5)
 
             pgui.press('end')
@@ -109,12 +97,13 @@ class StartAutomation(AutomationSetting.Automation):
             pgui.hotkey('ctrl', 'w')
             time.sleep(5)
         else:
-
-            for _ in range(5):
-                pgui.hotkey('alt', 'left')
-            time.sleep(5)
-
+            self.page_back(5)
             self.logger.debug("出品できなかったため、再度実行します。")
+
+            if do_not_delete_flag == 1:
+                self.automatic_listing_sold_product()
+                return
+            
             self.automatic_listing()
 
 
@@ -130,7 +119,7 @@ class StartAutomation(AutomationSetting.Automation):
         self.go_product_page()
 
         # 画像ありで再出品
-        self.re_listed_with_image()
+        self.image_path_click()
         time.sleep(6)
 
         # らくらくメルカリ便に変更される障害に対応するため、発送方法を普通郵便に変更する
@@ -226,22 +215,22 @@ class StartAutomation(AutomationSetting.Automation):
             '自動再出品': auto.automatic_listing,
             '自動RAGE': auto.automatic_rage,
             '自動発送': auto.automatic_shipping,
-            '自動再出品(取引画面)': auto.automatic_listing_sold_product
+            '自動再出品(取引画面)': lambda: auto.automatic_listing(1)
         }
 
         try:
             # Google Chromeのページに移動する
             auto.go_page()
 
-            while(int(int_count) > page_count):
+            while int(int_count) > page_count:
                 if int_count.isdecimal():
-                    
-                    # 辞書から実施するメソッドを選ぶ
-                    for dict_k, dict_v in func_dict.items():
+                    func = func_dict.get(dict_name)  # 辞書から関数を取得
+                    if func:
+                        func()  # 関数を実行
+                    else:
+                        pgui.alert(text='指定されたメソッド名が見つかりませんでした', title='エラー', button='OK')
+                        break
 
-                        # 実施するメソッドの辞書名とmainメソッド内の辞書名が同じだったとき
-                        if dict_name == dict_k:
-                            dict_v()
                     page_count += 1
                 else:
                     pgui.alert(text='数字を入力してください', title='エラー', button='OK')

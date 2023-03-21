@@ -9,13 +9,8 @@ from logging import getLogger, StreamHandler, DEBUG, Formatter, FileHandler
 class Automation(object):
 
     def __init__(self):
-        self.window_size_x, self.window_size_y = pgui.size()
         pgui.FAILSAFE = True
-
-        # インストール済みのTesseractへパスを通す
-        path_tesseract = "C:\\Program Files\\Tesseract-OCR"
-        if path_tesseract not in os.environ["PATH"].split(os.pathsep):
-            os.environ["PATH"] += os.pathsep + path_tesseract
+        self.width, self.height = pgui.size()
 
         # log.txtがなかったら作成する。
         folder_name = "log"
@@ -24,6 +19,7 @@ class Automation(object):
         if not os.path.exists(file_path):
             os.makedirs(folder_name, exist_ok=True)
             with open(file_path, "w") as file:
+                # file.write("This is a new file.")
                 pass
         else:
             pass
@@ -31,13 +27,11 @@ class Automation(object):
         # ログを設定する
         self.logger = getLogger(__name__)
 
-        # ------------------------------------------------------
         # コンソールに表示する場合は StreamHandler() を使う
-        handler = StreamHandler()
-        # ------------------------------------------------------
+        # handler = StreamHandler()
 
         # ログファイルがあることを確認してそこに書き込む
-        # handler = FileHandler("./log/log.txt")
+        handler = FileHandler("./log/log.txt")
 
 
         handler.setLevel(DEBUG)
@@ -50,13 +44,16 @@ class Automation(object):
         handler.setFormatter(formatter)
 
 
-    def get_window_size_x(self, x):
-        x = self.window_size_x * x
-        return x
+    def calculate_screen_ratio(self) -> tuple:
+        """_summary_
 
-    def get_window_size_y(self, y):
-        y = self.window_size_y * y
-        return y
+        画面サイズを取得する
+
+        Returns:
+            tuple: _description_
+        """
+        width, height = pgui.size()
+        return width / 3840, height / 2160
 
     def get_log_url(self) -> str:
         """_summary_
@@ -72,18 +69,19 @@ class Automation(object):
         element = pyper.paste()
         return element
 
-    def reloading_page(self, is_image: str) -> None:
+    def reloading_page(self, image_path: str, wait_time: int = 10) -> None:
         """_summary_
 
         指定した画像が読み込めなかったときリロードする。
 
         Args:
-            is_image (str): 指定した画像のPATH
+            image_path (str): 指定した画像のPATH
+            wait_time (int): リロード後の待機時間（秒）
         """
-        if is_image == None:
+        if image_path == None:
             pgui.press('F5')
             self.logger.debug("画像が読み込めないためリロードします。")
-            time.sleep(10)
+            time.sleep(wait_time)
 
     def image_locate_click(self, image_path: str) -> tuple:
         """_summary_
@@ -104,44 +102,50 @@ class Automation(object):
         pgui.click(locate, duration=0.5)
         return locate
 
-    def re_listed_with_image(self) -> tuple:
+    def image_path_click(self, image_path: str, log_flag: int = 0) -> tuple:
         """_summary_
 
-        画像あり再出品をする。
+        指定した画像の座標をクリックする。
         画像が読み込めなかったときはリロードしする。
         3回連続で読み込めないときは次のページへ移動する。
         5回連続で商品を読み込めずリロードしたときは、商品が再出品できる状態ではないと判断して処理自体を終了する。
 
         Returns:
-            locate : 画像あり再出品の座標を返す。
+            locate : 指定した画像の座標
         """
 
-        reload_count : int = 0
-        none_page_count : int = 0
+        MAX_RELOAD_ATTEMPTS = 3
+        MAX_NONE_PAGE_ATTEMPTS = 5
+
+        reload_count = 0
+        none_page_count = 0
+
 
         # 画像ありコピーが見つかるまで再読み込みする
-        while(True):
-            locate : tuple = pgui.locateOnScreen('../../image/mercari_copy.png', grayscale=True, confidence=0.7)
+        while none_page_count <= MAX_NONE_PAGE_ATTEMPTS:
+
+            locate = pgui.locateOnScreen(image_path, grayscale=True, confidence=0.7)
 
             # 画像が認識できなかったとき、再度読み込みをする
             self.reloading_page(locate)
             reload_count += 1
-            
+
             if locate != None:
                 break
 
-            if reload_count > 3:
+            if reload_count > MAX_RELOAD_ATTEMPTS:
                 reload_count = 0
                 none_page_count += 1
                 pgui.hotkey('ctrl', 'w')
                 self.logger.debug("3回読み込めなかったので次のタブへ移動します。")
 
-            if none_page_count > 5:
-                self.logger.error("再出品可能な状態ではありません。処理を強制終了します。")
-                self.logger.error("ImageNotFoundException")
-                raise pgui.ImageNotFoundException
-        
-        self.logger.debug("この商品を再出品します : " + self.get_log_url())
+        if none_page_count > MAX_NONE_PAGE_ATTEMPTS:
+            self.logger.critical("ImageNotFoundException:指定の座標がありません。処理を強制終了します。")
+            raise pgui.ImageNotFoundException
+
+        # 再出品のときだけログを書く　初期値は0
+        if log_flag == 1:
+            self.logger.debug("この商品を再出品します : " + self.get_log_url())
 
         pgui.click(locate, duration=0.5)
         return locate
@@ -167,17 +171,15 @@ class Automation(object):
         if pgui.locateOnScreen(image_path, grayscale=True, confidence=0.7):
             return True
 
-    def page_back(self) -> None:
+    def page_back(self, count:int) -> None:
         """_summary_
-
-        再出品完了後元の商品ページに戻る。
         
-        2023/03/14
-        らくらくメルカリ便への変更対応
-
+        ページを戻るだけ
+        
+        Args:
+            count (int): 戻るページ数
         """
-
-        for _ in range(7):
+        for _ in range(count):
             pgui.hotkey('alt', 'left')
 
     # 商品の編集を選択する
@@ -271,7 +273,6 @@ class Automation(object):
 
         Returns:
             bool: 売れていたらTrueを返す。
-            
         """
         if pgui.locateOnScreen('../../image/check_relisted.png', grayscale=True, confidence=0.7):
             return True
@@ -280,7 +281,6 @@ class Automation(object):
         """_summary_
 
         出品した商品に注意書きをコメントする。
-
         """
         self.image_locate_click('../../image/syuppinnsyouhinwomiru.png')
         time.sleep(2)
