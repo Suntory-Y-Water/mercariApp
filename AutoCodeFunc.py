@@ -7,7 +7,7 @@ import time
 class StartAutomation(AutomationSetting.Automation):
     def __init__(self):
         super().__init__()
-        pgui.FAILSAFE = True
+        
 
     def automatic_shipping(self) -> None:
         """_summary_
@@ -22,16 +22,16 @@ class StartAutomation(AutomationSetting.Automation):
         self.logger.debug("この商品を発送します : " + self.get_log_url())
 
         # お届け先を選択しドラッグ→コピー
-        self.image_locate_click('../../image/otodokesaki.png')
-        self.image_locate_click('../../image/otodokesaki.png')
+        self.image_locate_click(image_path=self.get_image_path('../../image/otodokesaki.png'))
+
         time.sleep(1)
 
         pgui.dragTo(x=self.width(set.dragToAddressX),
                     y=self.height(set.dragToAddressY), duration=0.5)
         pgui.hotkey('ctrl', 'c')
 
-        if self.image_locate_click('../../image/snap.png') or \
-            self.image_locate_click('../../image/snap_write.png'):
+        if self.image_locate_click(image_path='../../image/snap.png') or \
+            self.image_locate_click(image_path='../../image/snap_write.png'):
             
             self.printing_process()
             self.choice_printing()
@@ -41,10 +41,10 @@ class StartAutomation(AutomationSetting.Automation):
             return
 
         # 商品の発送を通知する
-        self.image_locate_click('../../image/hassouwotuutisuru.png')
+        self.image_locate_click(image_path=self.get_image_path('../../image/hassouwotuutisuru.png'))
         time.sleep(0.2)
 
-        self.image_locate_click('../../image/hontounihassousimasitaka.png')
+        self.image_locate_click(image_path=self.get_image_path('../../image/hontounihassousimasitaka.png'))
         # 次の出品までのリードタイム
         time.sleep(5.0)
         pgui.hotkey('ctrl', 'w')
@@ -61,10 +61,12 @@ class StartAutomation(AutomationSetting.Automation):
         """
         if do_not_delete_flag == 1:
             # 商品ページへ移動
-            self.go_product_page()          
+            self.go_product_page()
+            self.logger.info("商品ページへ移動")
+
 
         # 画像ありで再出品
-        self.image_path_click(image_path='../../image/mercari_copy.png', log_flag=1)
+        self.image_path_click(image_path=self.get_image_path('../../image/mercari_copy.png'), log_flag=1)
         time.sleep(6)
 
         pgui.press('end')
@@ -72,28 +74,35 @@ class StartAutomation(AutomationSetting.Automation):
 
         self.button_click_listing()
         time.sleep(5)
+        self.logger.info("再出品完了")
 
         # 出品ができていた場合
-        if self.check_page('../../image/check_relisted.png') == True:
+        if self.check_page(image_path=self.get_image_path('../../image/check_relisted.png')) == True:
             
             # コメントで注意書きをする
             self.comment_product()
+            self.logger.info("注意書きコメントを入力")
 
             # フラグ時はそのままページを閉じる
             if do_not_delete_flag == 1:
                 pgui.hotkey('ctrl', 'w')
+                self.logger.info("ページを閉じました")
                 return
             
             self.page_back(count=8)
+            self.logger.info("元の商品ページへ戻ります")
             time.sleep(6)
 
-            self.image_path_click(image_path='../../image/syouhinnnohensyuu.png')
+            self.image_path_click(image_path=self.get_image_path('../../image/syouhinnnohensyuu.png'))
             time.sleep(5)
 
             pgui.press('end')
+            self.logger.info("商品の編集へ移動")
             time.sleep(2)
 
             self.item_deleted()
+            self.logger.info("商品を削除しました")
+
             pgui.hotkey('ctrl', 'w')
             time.sleep(5)
         else:
@@ -101,7 +110,7 @@ class StartAutomation(AutomationSetting.Automation):
             self.logger.debug("出品できなかったため、再度実行します。")
 
             if do_not_delete_flag == 1:
-                self.automatic_listing_sold_product()
+                self.automatic_listing(do_not_delete_flag=1)
                 return
             
             self.automatic_listing()
@@ -124,7 +133,7 @@ class StartAutomation(AutomationSetting.Automation):
         pgui.press('end')
         time.sleep(2)
 
-        self.image_locate_click('../../image/hanbaikakaku.png')
+        self.image_locate_click(image_path=self.get_image_path('../../image/hanbaikakaku.png'))
         pgui.press('end')
         pgui.write('0')
         pgui.press('enter')
@@ -136,7 +145,7 @@ class StartAutomation(AutomationSetting.Automation):
         pgui.press('end')
         time.sleep(2)
 
-        self.image_locate_click('../../image/hanbaikakaku.png')
+        self.image_locate_click(image_path=self.get_image_path('../../image/hanbaikakaku.png'))
         pgui.press('end')
         pgui.press('backspace')
         pgui.press('enter')

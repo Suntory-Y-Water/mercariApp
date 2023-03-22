@@ -44,6 +44,23 @@ class Automation(object):
         handler.setFormatter(formatter)
 
 
+    def get_image_path(self, image_path: str) -> str:
+        """_summary_
+
+        画像取得時に画面解像度に応じて参照元を変化させる。
+
+        Args:
+            base_path (str): _description_
+
+        Returns:
+            str: _description_
+        """
+        if self.width == 3840 and self.height == 2160:
+            return image_path
+        else:
+            return image_path.replace("image/", "image_1920x1080/")
+        
+
     def calculate_screen_ratio(self) -> tuple:
         """_summary_
 
