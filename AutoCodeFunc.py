@@ -107,56 +107,6 @@ class StartAutomation(AutomationSetting.Automation):
             self.automatic_listing()
 
 
-    def automatic_listing_sold_product(self):
-        """_summary_
-
-        取引画面 or 商品ページから自動再出品
-        売り切れた商品が対象なため、出品後の商品削除は行わない。
-
-        """
-
-        # 商品ページへ移動
-        self.go_product_page()
-
-        # 画像ありで再出品
-        self.image_path_click()
-        time.sleep(6)
-
-        # らくらくメルカリ便に変更される障害に対応するため、発送方法を普通郵便に変更する
-        pgui.press('pagedown', presses=2)
-        time.sleep(0.5)
-        self.image_locate_click('../../image/henkousuru.png')
-        time.sleep(0.5)
-        pgui.press('end')
-        time.sleep(1)
-
-        self.image_locate_click('../../image/hutuuyuubin.png')
-        self.image_locate_click('../../image/kousinsuru.png')
-
-        time.sleep(3)
-
-        pgui.press('end')
-        time.sleep(2)
-
-        self.button_click_listing()
-        time.sleep(5)
-
-        # 出品できているかの処理
-        self.check_page('../../image/check_relisted.png')
-
-        # 出品ができていた場合コメントをする
-        if self.check_page('../../image/check_relisted.png') == True:
-            self.comment_product()
-            pgui.hotkey('ctrl', 'w')
-        else:
-            for _ in range(5):
-                pgui.hotkey('alt', 'left')
-            time.sleep(5)
-
-            self.logger.debug("出品できなかったため、再度実行します。")
-            self.automatic_listing_sold_product()
-
-
     def automatic_rage(self) -> None:
         """_summary_
 
@@ -164,7 +114,7 @@ class StartAutomation(AutomationSetting.Automation):
         商品の桁を一桁上げて一桁下げる。
 
         """
-        self.logger.debug("この商品をRAGEします : " + self.get_log_url())
+        # self.logger.debug("この商品をRAGEします : " + self.get_log_url())
 
         time.sleep(1)
 

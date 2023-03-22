@@ -266,6 +266,7 @@ class Automation(object):
         
         time.sleep(10)
 
+
     def check_listed(self) -> bool:
         """_summary_
 
@@ -276,6 +277,7 @@ class Automation(object):
         """
         if pgui.locateOnScreen('../../image/check_relisted.png', grayscale=True, confidence=0.7):
             return True
+
 
     def comment_product(self) -> None:
         """_summary_
@@ -292,7 +294,10 @@ class Automation(object):
         time.sleep(1)
 
         # 設定ファイルに記載されているコメントを貼り付ける
-        pyper.copy(set.comment)
+        with open("./setting/comment.txt", "r", encoding="utf-8") as f:
+            comment = f.read()
+        
+        pyper.copy(comment)
         pgui.hotkey('ctrl', 'v')
         time.sleep(1)
 
