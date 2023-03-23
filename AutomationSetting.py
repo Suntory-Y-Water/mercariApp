@@ -86,14 +86,14 @@ class Automation(object):
         element = pyper.paste()
         return element
 
-    def reloading_page(self, image_path: str, wait_time: int = 10) -> None:
+    def reloading_page(self, image_path: str, wait_time: float = 10.0) -> None:
         """_summary_
 
         指定した画像が読み込めなかったときリロードする。
 
         Args:
             image_path (str): 指定した画像のPATH
-            wait_time (int): リロード後の待機時間（秒）
+            wait_time (float): リロード後の待機時間（秒）
         """
         if image_path == None:
             pgui.press('F5')
@@ -119,13 +119,14 @@ class Automation(object):
         pgui.click(locate, duration=0.5)
         return locate
 
+
     def image_path_click(self, image_path: str, log_flag: int = 0) -> tuple:
         """_summary_
 
         指定した画像の座標をクリックする。
         画像が読み込めなかったときはリロードしする。
         3回連続で読み込めないときは次のページへ移動する。
-        5回連続で商品を読み込めずリロードしたときは、商品が再出品できる状態ではないと判断して処理自体を終了する。
+        5回連続で商品を読み込めずリロードしたときは画像がないと判断して処理自体を終了する。
 
         Returns:
             locate : 指定した画像の座標
@@ -167,6 +168,7 @@ class Automation(object):
         pgui.click(locate, duration=0.5)
         return locate
 
+
     def button_click_listing(self) -> tuple:
         """_summary_
 
@@ -188,46 +190,19 @@ class Automation(object):
         if pgui.locateOnScreen(image_path, grayscale=True, confidence=0.7):
             return True
 
+
     def page_back(self, count:int) -> None:
         """_summary_
         
-        ページを戻るだけ
+        ブラウザ上で前のページに戻る
         
         Args:
             count (int): 戻るページ数
         """
         for _ in range(count):
             pgui.hotkey('alt', 'left')
+        self.logger.info("元の商品ページへ戻ります")
 
-    # 商品の編集を選択する
-    def edit_products_click(self) -> tuple:
-        """_summary_
-
-        商品を編集するを選択する。
-        画像が読み込めなかったときはリロードし、5回連続で読み込めなかったときはページを閉じて処理を終了する。
-
-        Returns:
-            locate : 「商品を編集する」の座標を返す。
-        """
-
-        # 商品を編集するが見つかるまで再読み込みする
-        while(True):
-            locate: tuple = pgui.locateOnScreen('../../image/syouhinnnohensyuu.png', grayscale=True, confidence=0.7)
-
-            reload_count: int = 0
-
-            # 画像が認識できなかったとき、再度読み込みをする
-            self.reloading_page(locate)
-            reload_count += 1
-
-            if locate != None:
-                break
-
-            if reload_count > 5:
-                break
-
-        pgui.click(locate, duration=0.5)
-        return locate
 
     def item_deleted(self) -> None:
         """_summary_
@@ -240,6 +215,8 @@ class Automation(object):
 
         self.image_locate_click('../../image/sakujosuru.png')
         time.sleep(2)
+        self.logger.info("商品を削除しました")
+
 
     def go_page(self) -> None:
         """_summary_
@@ -300,6 +277,7 @@ class Automation(object):
         """_summary_
 
         出品した商品に注意書きをコメントする。
+
         """
         self.image_locate_click('../../image/syuppinnsyouhinwomiru.png')
         time.sleep(2)
@@ -309,6 +287,7 @@ class Automation(object):
 
         self.image_locate_click('../../image/komentoran.png')
         time.sleep(1)
+        self.logger.info("注意書きコメントを入力")
 
         # 設定ファイルに記載されているコメントを貼り付ける
         with open("./setting/comment.txt", "r", encoding="utf-8") as f:

@@ -38,7 +38,7 @@ class StartAutomation(AutomationSetting.Automation):
         else:
             pgui.confirm(text='Snapモードがありません。\n処理を終了します。', title='Error!')
             self.logger.error("Snapモードがありませんでした。処理を終了します。")
-            return
+            raise pgui.ImageNotFoundException
 
         # 商品の発送を通知する
         self.image_locate_click(image_path=self.get_image_path('../../image/hassouwotuutisuru.png'))
@@ -81,16 +81,14 @@ class StartAutomation(AutomationSetting.Automation):
             
             # コメントで注意書きをする
             self.comment_product()
-            self.logger.info("注意書きコメントを入力")
 
             # フラグ時はそのままページを閉じる
             if do_not_delete_flag == 1:
                 pgui.hotkey('ctrl', 'w')
-                self.logger.info("ページを閉じました")
+                self.logger.info("出品後、ページを閉じました")
                 return
             
             self.page_back(count=8)
-            self.logger.info("元の商品ページへ戻ります")
             time.sleep(6)
 
             self.image_path_click(image_path=self.get_image_path('../../image/syouhinnnohensyuu.png'))
@@ -127,7 +125,7 @@ class StartAutomation(AutomationSetting.Automation):
 
         time.sleep(1)
 
-        self.edit_products_click()
+        self.image_path_click(image_path=self.get_image_path('../../image/syouhinnnohensyuu.png'))
         time.sleep(5)
 
         pgui.press('end')
@@ -139,7 +137,7 @@ class StartAutomation(AutomationSetting.Automation):
         pgui.press('enter')
         time.sleep(3)
 
-        self.edit_products_click()
+        self.image_path_click(image_path=self.get_image_path('../../image/syouhinnnohensyuu.png'))
         time.sleep(5)
 
         pgui.press('end')
