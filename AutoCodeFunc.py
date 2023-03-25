@@ -72,7 +72,7 @@ class StartAutomation(AutomationSetting.Automation):
         pgui.press('end')
         time.sleep(2)
 
-        self.button_click_listing()
+        self.image_locate_click(image_path=self.get_image_path('../../image/syuppinsuru.png'))
         time.sleep(5)
         self.logger.info("再出品完了")
 
@@ -91,6 +91,8 @@ class StartAutomation(AutomationSetting.Automation):
             self.page_back(count=8)
             time.sleep(6)
 
+            # コメントに被らないようにする
+            pgui.moveTo(x=100, y=100)
             self.image_path_click(image_path=self.get_image_path('../../image/syouhinnnohensyuu.png'))
             time.sleep(5)
 
@@ -121,7 +123,9 @@ class StartAutomation(AutomationSetting.Automation):
         商品の桁を一桁上げて一桁下げる。
 
         """
-        # self.logger.debug("この商品をRAGEします : " + self.get_log_url())
+        self.logger.debug("この商品をRAGEします : " + self.get_log_url())
+        # edgsの履歴表示対策
+        pgui.click(x=330, y=930)
 
         time.sleep(1)
 
@@ -177,7 +181,9 @@ class StartAutomation(AutomationSetting.Automation):
 
         try:
             # Google Chromeのページに移動する
-            auto.go_page()
+            pgui.keyDown('alt')  # altキーを押しっぱなしにしてtabを二回押す
+            pgui.press('tab')
+            pgui.keyUp('alt')
 
             while int(int_count) > page_count:
                 if int_count.isdecimal():

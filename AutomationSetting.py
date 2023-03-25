@@ -113,11 +113,18 @@ class Automation(object):
         """
         locate = pgui.locateOnScreen(image_path, grayscale=True, confidence=0.7)
 
-        if locate == None:
-            raise pgui.ImageNotFoundException
-        
-        pgui.click(locate, duration=0.5)
-        return locate
+        try:
+            locate = pgui.locateOnScreen(image_path, grayscale=True, confidence=0.7)
+            if not locate:
+                raise pgui.ImageNotFoundException
+            
+        except pgui.ImageNotFoundException:
+            self.logger.error(f"Error: The image {image_path} was not found on the screen.")
+            return None
+
+        x, y = pgui.center(locate)
+        pgui.click(x, y, duration=0.5)
+        return (x, y)
 
 
     def image_path_click(self, image_path: str, log_flag: int = 0) -> tuple:
@@ -139,7 +146,7 @@ class Automation(object):
         none_page_count = 0
 
 
-        # 画像ありコピーが見つかるまで再読み込みする
+        # 指定した画像の座標をクリックする。
         while none_page_count <= MAX_NONE_PAGE_ATTEMPTS:
 
             locate = pgui.locateOnScreen(image_path, grayscale=True, confidence=0.7)
@@ -168,16 +175,6 @@ class Automation(object):
         pgui.click(locate, duration=0.5)
         return locate
 
-
-    def button_click_listing(self) -> tuple:
-        """_summary_
-
-        出品するを選択する
-
-        Returns:
-            tuple :「出品する」の座標を返す。
-        """
-        return self.image_locate_click('../../image/syuppinsuru.png')
 
     def check_page(self, image_path:str) -> bool:
         """_summary_
@@ -210,23 +207,12 @@ class Automation(object):
         商品編集画面で削除ボタンを押す。
 
         """
-        self.image_locate_click('../../image/konosyouhinwosakujosuru.png')
+        self.image_locate_click(image_path=self.get_image_path('../../image/konosyouhinwosakujosuru.png'))
         time.sleep(1)
 
-        self.image_locate_click('../../image/sakujosuru.png')
+        self.image_locate_click(image_path=self.get_image_path('../../image/sakujosuru.png'))
         time.sleep(2)
-        self.logger.info("商品を削除しました")
 
-
-    def go_page(self) -> None:
-        """_summary_
-
-        現在のページから実行するGooglechromeのタブへ移動する。
-
-        """
-        pgui.keyDown('alt')  # altキーを押しっぱなしにしてtabを二回押す
-        pgui.press('tab')
-        pgui.keyUp('alt')
 
     # RAGE時の値段上昇
     def rage_up(self) -> None:
@@ -261,31 +247,19 @@ class Automation(object):
         time.sleep(10)
 
 
-    def check_listed(self) -> bool:
-        """_summary_
-
-        再出品ができているか確認する。
-
-        Returns:
-            bool: 売れていたらTrueを返す。
-        """
-        if pgui.locateOnScreen('../../image/check_relisted.png', grayscale=True, confidence=0.7):
-            return True
-
-
     def comment_product(self) -> None:
         """_summary_
 
         出品した商品に注意書きをコメントする。
 
         """
-        self.image_locate_click('../../image/syuppinnsyouhinwomiru.png')
+        self.image_locate_click(image_path=self.get_image_path('../../image/syuppinnsyouhinwomiru.png'))
         time.sleep(2)
 
-        self.image_locate_click('../../image/komentowonyuuryoku.png')
+        self.image_locate_click(image_path=self.get_image_path('../../image/komentowonyuuryoku.png'))
         time.sleep(3)
 
-        self.image_locate_click('../../image/komentoran.png')
+        pgui.press('tab')
         time.sleep(1)
         self.logger.info("注意書きコメントを入力")
 
