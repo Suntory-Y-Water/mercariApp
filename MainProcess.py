@@ -22,7 +22,7 @@ class GUI(AutoCodeFunc.StartAutomation):
                   [sg.Text('件数', size=GUI_TEXT_SIZE, font=GUI_FONT_SIZE),
                    sg.InputText('', size=GUI_INPUT_SIZE, key='number')],
                   [sg.Text()],
-                  [sg.Button('確認', font=GUI_FONT_SIZE, enable_events=True, key='confirmation')]]
+                  [sg.Button('確認', font=GUI_FONT_SIZE, enable_events=True, key='confirmation', bind_return_key=True)]]
         return layout
 
     def gui_main(self):
@@ -32,7 +32,7 @@ class GUI(AutoCodeFunc.StartAutomation):
 
         layout = self.create_layout()
 
-        window = sg.Window('メルカリ 作業自動化アプリ', layout)
+        window = sg.Window('メルカリ 作業自動化アプリ', layout, return_keyboard_events=True)
 
         while True:
             event, values = window.read()

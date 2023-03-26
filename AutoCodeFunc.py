@@ -125,7 +125,7 @@ class StartAutomation(AutomationSetting.Automation):
         """
         self.logger.debug("この商品をRAGEします : " + self.get_log_url())
         # edgsの履歴表示対策
-        pgui.click(x=330, y=930)
+        pgui.click(x=330, y=1530)
 
         time.sleep(1)
 
@@ -191,7 +191,7 @@ class StartAutomation(AutomationSetting.Automation):
                     if func:
                         func()  # 関数を実行
                     else:
-                        pgui.alert(text='指定されたメソッド名が見つかりませんでした', title='エラー', button='OK')
+                        pgui.alert(text='正しくプログラム名を入力してください。', title='エラー', button='OK')
                         break
 
                     page_count += 1

@@ -264,7 +264,7 @@ class Automation(object):
         self.logger.info("注意書きコメントを入力")
 
         # 設定ファイルに記載されているコメントを貼り付ける
-        with open("./setting/comment.txt", "r", encoding="utf-8") as f:
+        with open("../../setting/comment.txt", "r", encoding="utf-8") as f:
             comment = f.read()
         
         pyper.copy(comment)
