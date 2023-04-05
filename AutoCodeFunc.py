@@ -26,8 +26,8 @@ class StartAutomation(AutomationSetting.Automation):
 
         time.sleep(1)
 
-        pgui.dragTo(x=self.width(set.dragToAddressX),
-                    y=self.height(set.dragToAddressY), duration=0.5)
+        pgui.dragTo(x=self.width * set.dragToAddressX,
+                    y=self.height * set.dragToAddressY, duration=0.5)
         pgui.hotkey('ctrl', 'c')
 
         if self.image_locate_click(image_path='../../image/snap.png') or \
@@ -179,12 +179,12 @@ class StartAutomation(AutomationSetting.Automation):
             '自動再出品(取引画面)': lambda: auto.automatic_listing(1)
         }
 
+        # Google Chromeのページに移動する
+        pgui.keyDown('alt')  # altキーを押しっぱなしにしてtabを二回押す
+        pgui.press('tab')
+        pgui.keyUp('alt')
+    
         try:
-            # Google Chromeのページに移動する
-            pgui.keyDown('alt')  # altキーを押しっぱなしにしてtabを二回押す
-            pgui.press('tab')
-            pgui.keyUp('alt')
-
             while int(int_count) > page_count:
                 if int_count.isdecimal():
                     func = func_dict.get(dict_name)  # 辞書から関数を取得
