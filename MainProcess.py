@@ -17,7 +17,7 @@ class GUI(AutoCodeFunc.StartAutomation):
 
         layout = [[sg.Text('■プログラムを選択してください\n', font=GUI_FONT_SIZE)],
                   [sg.Text('プログラム名', size=GUI_TEXT_SIZE, font=GUI_FONT_SIZE),
-                   sg.Combo(('自動再出品', '自動RAGE', '自動発送', '自動再出品(取引画面)'),
+                   sg.Combo(('自動再出品', '自動RAGE', '自動発送', '自動再出品(取引画面)','自動再出品(添字)'),
                             default_value='自動再出品', size=GUI_INPUT_SIZE, key='code')],
                   [sg.Text('件数', size=GUI_TEXT_SIZE, font=GUI_FONT_SIZE),
                    sg.InputText('', size=GUI_INPUT_SIZE, key='number')],

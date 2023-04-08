@@ -67,18 +67,18 @@ class StartAutomation(AutomationSetting.Automation):
 
         # 画像ありで再出品
         self.image_path_click(image_path=self.get_image_path('../../image/mercari_copy.png'), log_flag=1)
-        time.sleep(6)
+        time.sleep(8)
 
         pgui.press('end')
         time.sleep(2)
 
         self.image_locate_click(image_path=self.get_image_path('../../image/syuppinsuru.png'))
         time.sleep(5)
-        self.logger.info("再出品完了")
 
         # 出品ができていた場合
         if self.check_page(image_path=self.get_image_path('../../image/check_relisted.png')) == True:
-            
+
+            self.logger.info("再出品完了")
             # コメントで注意書きをする
             self.comment_product()
 
@@ -88,7 +88,7 @@ class StartAutomation(AutomationSetting.Automation):
                 self.logger.info("出品後、ページを閉じました")
                 return
             
-            self.page_back(count=8)
+            self.page_back(count=10)
             time.sleep(6)
 
             # コメントに被らないようにする
@@ -106,7 +106,7 @@ class StartAutomation(AutomationSetting.Automation):
             pgui.hotkey('ctrl', 'w')
             time.sleep(5)
         else:
-            self.page_back(5)
+            self.page_back(count=8)
             self.logger.debug("出品できなかったため、再度実行します。")
 
             if do_not_delete_flag == 1:
@@ -156,6 +156,47 @@ class StartAutomation(AutomationSetting.Automation):
         pgui.hotkey('ctrl', 'w')
 
 
+    def automatic_listing_with_index(self) -> None:
+        """_summary_
+
+        自動再出品(添字つける)
+        商品を再出品して、商品名に添え字をつける。
+
+        """
+        # 商品ページへ移動
+        self.go_product_page()
+        self.logger.info("商品ページへ移動")
+
+
+        # 画像ありで再出品
+        self.image_path_click(image_path=self.get_image_path('../../image/mercari_copy.png'), log_flag=1)
+        time.sleep(8)
+
+        # 商品名にtab押下で移動する
+        pgui.press('tab', presses=10)
+        
+        # 商品名の最後に「a」を入れる
+        pgui.press('end')
+        pgui.keyDown('shift')
+        pgui.write(' a')
+        pgui.keyUp('shift')
+        pgui.press('enter')
+        time.sleep(5)
+
+        # 出品ができていた場合
+        if self.check_page(image_path=self.get_image_path('../../image/check_relisted.png')) == True:
+            
+            self.logger.info("再出品完了")            
+            # コメントで注意書きをする
+            self.comment_product()
+            pgui.hotkey('ctrl', 'w')
+            self.logger.info("出品後、ページを閉じました")
+        else:
+            self.page_back(count=8)
+            self.logger.debug("出品できなかったため、再度実行します。")
+            self.automatic_listing_with_index()
+
+
     def main(int_count: int, dict_name: str) -> None:
         """_summary_
 
@@ -176,7 +217,8 @@ class StartAutomation(AutomationSetting.Automation):
             '自動再出品': auto.automatic_listing,
             '自動RAGE': auto.automatic_rage,
             '自動発送': auto.automatic_shipping,
-            '自動再出品(取引画面)': lambda: auto.automatic_listing(1)
+            '自動再出品(取引画面)': lambda: auto.automatic_listing(1),
+            '自動再出品(添字)': auto.automatic_listing_with_index
         }
 
         # Google Chromeのページに移動する

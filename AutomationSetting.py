@@ -244,7 +244,7 @@ class Automation(object):
             pgui.hotkey('ctrl', 'v')
             pgui.press('enter')
         
-        time.sleep(10)
+        time.sleep(6)
 
 
     def comment_product(self) -> None:
