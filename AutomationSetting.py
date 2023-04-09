@@ -3,7 +3,7 @@ import pyperclip as pyper
 import Setting as set
 import time
 import os
-from logging import getLogger, StreamHandler, DEBUG, Formatter, FileHandler
+from logging import getLogger, DEBUG, ERROR, Formatter, FileHandler
 
 
 class Automation(object):
@@ -12,36 +12,43 @@ class Automation(object):
         pgui.FAILSAFE = True
         self.width, self.height = pgui.size()
 
-        # log.txtがなかったら作成する。
         folder_name = "log"
-        file_name = "log.txt"
-        file_path = os.path.join(folder_name, file_name)
-        if not os.path.exists(file_path):
-            os.makedirs(folder_name, exist_ok=True)
-            with open(file_path, "w") as file:
-                # file.write("This is a new file.")
-                pass
-        else:
-            pass
+        file_names = ["log.txt", "log_error.txt", "log_image_transition.txt", "log_url.txt"]
 
-        # ログを設定する
-        self.logger = getLogger(__name__)
+        self.create_log_files(folder_name, file_names)
+        self.configure_loggers(folder_name, file_names)
 
-        # コンソールに表示する場合は StreamHandler() を使う
-        # handler = StreamHandler()
+    def create_log_files(self, folder_name, file_names):
+        for file_name in file_names:
+            file_path = os.path.join(folder_name, file_name)
+            if not os.path.exists(file_path):
+                os.makedirs(folder_name, exist_ok=True)
+                with open(file_path, "w") as file:
+                    pass
 
-        # ログファイルがあることを確認してそこに書き込む
-        handler = FileHandler("./log/log.txt")
-
-
-        handler.setLevel(DEBUG)
-        self.logger.setLevel(DEBUG)
-        for h in self.logger.handlers[:]:
-            self.logger.removeHandler(h)
-            h.close()
-        self.logger.addHandler(handler)
+    def configure_loggers(self, folder_name, file_names):
         formatter = Formatter('%(asctime)s - %(filename)s - %(funcName)s - %(message)s')
+
+        self.logger = self.create_logger("logger", folder_name, file_names[0], formatter, DEBUG)
+        self.logger_error = self.create_logger("logger_error", folder_name, file_names[1], formatter, ERROR)
+        self.logger_image_transition = self.create_logger("logger_image_transition", folder_name, file_names[2], formatter, DEBUG)
+        self.logger_url = self.create_logger("logger_url", folder_name, file_names[3], formatter, DEBUG)
+
+    def create_logger(self, name, folder_name, file_name, formatter, level):
+        logger = getLogger(name)
+        logger.setLevel(level)
+
+        for h in logger.handlers[:]:
+            logger.removeHandler(h)
+            h.close()
+
+        handler = FileHandler(os.path.join(folder_name, file_name), encoding="UTF-8")
+        handler.setLevel(level)
         handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
+        return logger
+
 
 
     def get_image_path(self, image_path: str) -> str:
@@ -98,6 +105,7 @@ class Automation(object):
         if image_path == None:
             pgui.press('F5')
             self.logger.debug("画像が読み込めないためリロードします。")
+            self.logger_image_transition.debug("画像が読み込めないためリロードします。")            
             time.sleep(wait_time)
 
     def image_locate_click(self, image_path: str) -> tuple:
@@ -120,6 +128,7 @@ class Automation(object):
             
         except pgui.ImageNotFoundException:
             self.logger.error(f"Error: The image {image_path} was not found on the screen.")
+            self.logger_error.error(f"Error: The image {image_path} was not found on the screen.")
             return None
 
         x, y = pgui.center(locate)
@@ -163,14 +172,17 @@ class Automation(object):
                 none_page_count += 1
                 pgui.hotkey('ctrl', 'w')
                 self.logger.debug("3回読み込めなかったので次のタブへ移動します。")
+                self.logger_image_transition.debug("3回読み込めなかったので次のタブへ移動します。")
 
         if none_page_count > MAX_NONE_PAGE_ATTEMPTS:
             self.logger.critical("ImageNotFoundException:指定の座標がありません。処理を強制終了します。")
+            self.logger_error.critical("ImageNotFoundException:指定の座標がありません。処理を強制終了します。")
             raise pgui.ImageNotFoundException
 
         # 再出品のときだけログを書く　初期値は0
         if log_flag == 1:
             self.logger.debug("この商品を再出品します : " + self.get_log_url())
+            self.logger_url.debug("この商品を再出品します : " + self.get_log_url())
 
         pgui.click(locate, duration=0.5)
         return locate
@@ -199,6 +211,7 @@ class Automation(object):
         for _ in range(count):
             pgui.hotkey('alt', 'left')
         self.logger.info("元の商品ページへ戻ります")
+        self.logger_image_transition.info("元の商品ページへ戻ります")
 
 
     def item_deleted(self) -> None:
@@ -262,6 +275,7 @@ class Automation(object):
         pgui.press('tab')
         time.sleep(1)
         self.logger.info("注意書きコメントを入力")
+        self.logger_image_transition.info("注意書きコメントを入力")
 
         # 設定ファイルに記載されているコメントを貼り付ける
         with open("../../setting/comment.txt", "r", encoding="utf-8") as f:

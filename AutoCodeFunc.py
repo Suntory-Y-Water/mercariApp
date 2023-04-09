@@ -20,6 +20,7 @@ class StartAutomation(AutomationSetting.Automation):
         time.sleep(2)
 
         self.logger.debug("この商品を発送します : " + self.get_log_url())
+        self.logger_url.debug("この商品を発送します : " + self.get_log_url())
 
         # お届け先を選択しドラッグ→コピー
         self.image_locate_click(image_path=self.get_image_path('../../image/otodokesaki.png'))
@@ -38,6 +39,7 @@ class StartAutomation(AutomationSetting.Automation):
         else:
             pgui.confirm(text='Snapモードがありません。\n処理を終了します。', title='Error!')
             self.logger.error("Snapモードがありませんでした。処理を終了します。")
+            self.logger_error.error("Snapモードがありませんでした。処理を終了します。")
             raise pgui.ImageNotFoundException
 
         # 商品の発送を通知する
@@ -63,6 +65,7 @@ class StartAutomation(AutomationSetting.Automation):
             # 商品ページへ移動
             self.go_product_page()
             self.logger.info("商品ページへ移動")
+            self.logger_image_transition.info("商品ページへ移動")
 
 
         # 画像ありで再出品
@@ -79,6 +82,8 @@ class StartAutomation(AutomationSetting.Automation):
         if self.check_page(image_path=self.get_image_path('../../image/check_relisted.png')) == True:
 
             self.logger.info("再出品完了")
+            self.logger_image_transition.info("再出品完了")
+
             # コメントで注意書きをする
             self.comment_product()
 
@@ -86,6 +91,7 @@ class StartAutomation(AutomationSetting.Automation):
             if do_not_delete_flag == 1:
                 pgui.hotkey('ctrl', 'w')
                 self.logger.info("出品後、ページを閉じました")
+                self.logger_image_transition.info("出品後、ページを閉じました")
                 return
             
             self.page_back(count=10)
@@ -98,16 +104,19 @@ class StartAutomation(AutomationSetting.Automation):
 
             pgui.press('end')
             self.logger.info("商品の編集へ移動")
+            self.logger_image_transition.info("商品の編集へ移動")
             time.sleep(2)
 
             self.item_deleted()
             self.logger.info("商品を削除しました")
+            self.logger_image_transition.info("商品を削除しました")
 
             pgui.hotkey('ctrl', 'w')
             time.sleep(5)
         else:
             self.page_back(count=8)
             self.logger.debug("出品できなかったため、再度実行します。")
+            self.logger_image_transition.debug("出品できなかったため、再度実行します。")
 
             if do_not_delete_flag == 1:
                 self.automatic_listing(do_not_delete_flag=1)
@@ -124,6 +133,8 @@ class StartAutomation(AutomationSetting.Automation):
 
         """
         self.logger.debug("この商品をRAGEします : " + self.get_log_url())
+        self.logger_url.debug("この商品をRAGEします : " + self.get_log_url())
+
         # edgsの履歴表示対策
         pgui.click(x=330, y=1530)
 
@@ -166,7 +177,7 @@ class StartAutomation(AutomationSetting.Automation):
         # 商品ページへ移動
         self.go_product_page()
         self.logger.info("商品ページへ移動")
-
+        self.logger_image_transition.info("商品ページへ移動")
 
         # 画像ありで再出品
         self.image_path_click(image_path=self.get_image_path('../../image/mercari_copy.png'), log_flag=1)
@@ -180,21 +191,25 @@ class StartAutomation(AutomationSetting.Automation):
         pgui.keyDown('shift')
         pgui.write(' a')
         pgui.keyUp('shift')
-        pgui.press('enter')
+        pgui.press('enter', presses=2)
         time.sleep(5)
 
         # 出品ができていた場合
         if self.check_page(image_path=self.get_image_path('../../image/check_relisted.png')) == True:
             
-            self.logger.info("再出品完了")            
+            self.logger.info("再出品完了")
+            self.logger_image_transition.info("再出品完了")
+
             # コメントで注意書きをする
             self.comment_product()
+
             pgui.hotkey('ctrl', 'w')
             self.logger.info("出品後、ページを閉じました")
+            self.logger_image_transition.info("出品後、ページを閉じました")
         else:
-            self.page_back(count=8)
-            self.logger.debug("出品できなかったため、再度実行します。")
-            self.automatic_listing_with_index()
+            self.logger.debug("出品できなかったため、次の商品へ移動します")
+            self.logger_image_transition.debug("出品できなかったため、次の商品へ移動します")
+            pgui.hotkey('ctrl', 'w')
 
 
     def main(int_count: int, dict_name: str) -> None:
@@ -250,5 +265,7 @@ class StartAutomation(AutomationSetting.Automation):
         except Exception as e:
             auto.logger.error(e)
             auto.logger.error("例外を検知しました。強制終了します。")
+            auto.logger_error.error(e)
+            auto.logger_error.error("例外を検知しました。強制終了します。")
             pgui.alert(text='例外を検知しました。強制終了します。', title='エラー', button='OK')
             return
