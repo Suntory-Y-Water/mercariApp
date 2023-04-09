@@ -51,7 +51,11 @@
  [],
  False,
  False,
+<<<<<<< HEAD
  1681043645,
+=======
+ 1680998580,
+>>>>>>> d1b93b62a912f5ea08b644f05d81670be4150e15
  [('runw.exe',
    'C:\\Users\\NOkud\\anaconda3\\envs\\mercari\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\runw.exe',
    'EXECUTABLE')])

@@ -81,7 +81,6 @@ class StartAutomation(Automation):
         if self.check_page(image_path=self.get_image_path('../../image/check_relisted.png')) == True:
 
             self.logger.info("再出品完了")
-
             # コメントで注意書きをする
             self.comment_product()
 
@@ -127,7 +126,6 @@ class StartAutomation(Automation):
 
         """
         self.logger.debug("この商品をRAGEします : " + self.get_log_url())
-
         # edgsの履歴表示対策
         pgui.click(x=330, y=1530)
 
@@ -198,16 +196,16 @@ class StartAutomation(Automation):
         # 出品ができていた場合
         if self.check_page(image_path=self.get_image_path('../../image/check_relisted.png')) == True:
             
-            self.logger.info("再出品完了")
-
+            self.logger.info("再出品完了")            
             # コメントで注意書きをする
             self.comment_product()
 
             pgui.hotkey('ctrl', 'w')
             self.logger.info("出品後、ページを閉じました")
         else:
-            self.logger.debug("出品できなかったため、次の商品へ移動します")
-            pgui.hotkey('ctrl', 'w')
+            self.page_back(count=8)
+            self.logger.debug("出品できなかったため、再度実行します。")
+            self.automatic_listing_with_index()
 
 
     def main(int_count: int, dict_name: str) -> None:
