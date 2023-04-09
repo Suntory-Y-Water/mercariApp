@@ -1,10 +1,11 @@
 import pyautogui as pgui
-import AutomationSetting
+import pyperclip as pyper
+from AutomationSetting import Automation
 import Setting as set
 import time
 
 
-class StartAutomation(AutomationSetting.Automation):
+class StartAutomation(Automation):
     def __init__(self):
         super().__init__()
         
@@ -20,6 +21,7 @@ class StartAutomation(AutomationSetting.Automation):
         time.sleep(2)
 
         self.logger.debug("この商品を発送します : " + self.get_log_url())
+        self.logger_url.debug("この商品を発送します : " + self.get_log_url())
 
         # お届け先を選択しドラッグ→コピー
         self.image_locate_click(image_path=self.get_image_path('../../image/otodokesaki.png'))
@@ -79,6 +81,7 @@ class StartAutomation(AutomationSetting.Automation):
         if self.check_page(image_path=self.get_image_path('../../image/check_relisted.png')) == True:
 
             self.logger.info("再出品完了")
+
             # コメントで注意書きをする
             self.comment_product()
 
@@ -124,6 +127,7 @@ class StartAutomation(AutomationSetting.Automation):
 
         """
         self.logger.debug("この商品をRAGEします : " + self.get_log_url())
+
         # edgsの履歴表示対策
         pgui.click(x=330, y=1530)
 
@@ -167,34 +171,43 @@ class StartAutomation(AutomationSetting.Automation):
         self.go_product_page()
         self.logger.info("商品ページへ移動")
 
-
         # 画像ありで再出品
         self.image_path_click(image_path=self.get_image_path('../../image/mercari_copy.png'), log_flag=1)
         time.sleep(8)
 
-        # 商品名にtab押下で移動する
-        pgui.press('tab', presses=10)
+        pgui.press('pagedown')
+        time.sleep(2)
         
+        # 商品名を選択
+        self.image_path_click(image_path=self.get_image_path('../../image/syouhinmei.png'))
+
+        # 出品する商品名をログに書き込む
+        pgui.hotkey('ctrl', 'a')
+        pgui.hotkey('ctrl', 'c')
+        element = pyper.paste()
+        self.logger_products_name.info(element)
+
         # 商品名の最後に「a」を入れる
         pgui.press('end')
         pgui.keyDown('shift')
         pgui.write(' a')
         pgui.keyUp('shift')
-        pgui.press('enter')
+        pgui.press('enter', presses=2)
         time.sleep(5)
 
         # 出品ができていた場合
         if self.check_page(image_path=self.get_image_path('../../image/check_relisted.png')) == True:
             
-            self.logger.info("再出品完了")            
+            self.logger.info("再出品完了")
+
             # コメントで注意書きをする
             self.comment_product()
+
             pgui.hotkey('ctrl', 'w')
             self.logger.info("出品後、ページを閉じました")
         else:
-            self.page_back(count=8)
-            self.logger.debug("出品できなかったため、再度実行します。")
-            self.automatic_listing_with_index()
+            self.logger.debug("出品できなかったため、次の商品へ移動します")
+            pgui.hotkey('ctrl', 'w')
 
 
     def main(int_count: int, dict_name: str) -> None:
