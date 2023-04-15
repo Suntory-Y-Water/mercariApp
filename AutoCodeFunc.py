@@ -21,7 +21,6 @@ class StartAutomation(Automation):
         time.sleep(2)
 
         self.logger.debug("この商品を発送します : " + self.get_log_url())
-        self.logger_url.debug("この商品を発送します : " + self.get_log_url())
 
         # お届け先を選択しドラッグ→コピー
         self.image_locate_click(image_path=self.get_image_path('../../image/otodokesaki.png'))

@@ -2,7 +2,7 @@ import pyautogui as pgui
 import pyperclip as pyper
 import time
 import os
-from logging import getLogger, DEBUG, ERROR, Formatter, FileHandler
+from logging import getLogger, DEBUG, Formatter, FileHandler
 
 
 class Automation(object):
@@ -287,10 +287,14 @@ class Automation(object):
         印刷時、前の宛名を削除してペーストする。
 
         """
-        pgui.hotkey('ctrl', 'z')
+        pgui.hotkey('ctrl', 'a')
+        pgui.press('backspace')
         time.sleep(1)
 
         pgui.hotkey('ctrl', 'v')
+        pgui.press('backspace')
+        pgui.press('up', presses=9)
+        pgui.press('delete', presses=5)
 
     def choice_printing(self) -> None:
         """_summary_
