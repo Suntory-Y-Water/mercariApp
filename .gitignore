@@ -1,6 +1,6 @@
 /__pycache__
 /log
-/dist/Mainprocess
+/dist
 /build
 /setting
 locate.py
