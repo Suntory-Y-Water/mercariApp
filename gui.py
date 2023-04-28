@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 import pyautogui as pgui
-from AutoCodeFunc import StartAutomation
+from main_function import StartAutomation
 
 
 class GUI(StartAutomation):

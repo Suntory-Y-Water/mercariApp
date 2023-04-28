@@ -1,7 +1,7 @@
 import pyautogui as pgui
 import pyperclip as pyper
-from AutomationSetting import Automation
-import Setting as set
+from element import Automation
+import setting as set
 import time
 
 

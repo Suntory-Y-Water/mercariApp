@@ -5,8 +5,8 @@
 # -----------------------------------------------
 
 # お届け先をドラッグした先
-dragToAddressX = 0.354166
-dragToAddressY = 0.782407
+dragToAddressX = 0.29427
+dragToAddressY = 0.78703
 
 # 取引画面から商品ページへ移動する
 moveProductsPageX = 0.2526041667
