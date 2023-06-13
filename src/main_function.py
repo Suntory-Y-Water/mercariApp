@@ -23,7 +23,7 @@ class StartAutomation(Automation):
         self.logger.debug("この商品を発送します : " + self.get_log_url())
 
         # お届け先を選択しドラッグ→コピー
-        self.image_locate_click(image_path=self.get_image_path('../../image/otodokesaki.png'))
+        self.image_locate_click(image_path=self.get_image_path('../image/otodokesaki.png'))
 
         time.sleep(1)
 
@@ -31,8 +31,8 @@ class StartAutomation(Automation):
                     y=self.height * set.dragToAddressY, duration=0.5)
         pgui.hotkey('ctrl', 'c')
 
-        if self.image_locate_click(image_path='../../image/snap.png') or \
-            self.image_locate_click(image_path='../../image/snap_write.png'):
+        if self.image_locate_click(image_path='../image/snap.png') or \
+            self.image_locate_click(image_path='../image/snap_write.png'):
             
             self.printing_process()
             self.choice_printing()
@@ -42,10 +42,10 @@ class StartAutomation(Automation):
             raise pgui.ImageNotFoundException
 
         # 商品の発送を通知する
-        self.image_locate_click(image_path=self.get_image_path('../../image/hassouwotuutisuru.png'))
+        self.image_locate_click(image_path=self.get_image_path('../image/hassouwotuutisuru.png'))
         time.sleep(0.2)
 
-        self.image_locate_click(image_path=self.get_image_path('../../image/hontounihassousimasitaka.png'))
+        self.image_locate_click(image_path=self.get_image_path('../image/hontounihassousimasitaka.png'))
         # 次の出品までのリードタイム
         time.sleep(5.0)
         pgui.hotkey('ctrl', 'w')
@@ -67,17 +67,17 @@ class StartAutomation(Automation):
 
 
         # 画像ありで再出品
-        self.image_path_click(image_path=self.get_image_path('../../image/mercari_copy.png'), log_flag=1)
+        self.image_path_click(image_path=self.get_image_path('../image/mercari_copy.png'), log_flag=1)
         time.sleep(8)
 
         pgui.press('end')
         time.sleep(2)
 
-        self.image_locate_click(image_path=self.get_image_path('../../image/syuppinsuru.png'))
+        self.image_locate_click(image_path=self.get_image_path('../image/syuppinsuru.png'))
         time.sleep(5)
 
         # 出品ができていた場合
-        if self.check_page(image_path=self.get_image_path('../../image/check_relisted.png')) == True:
+        if self.check_page(image_path=self.get_image_path('../image/check_relisted.png')) == True:
 
             self.logger.info("再出品完了")
             # コメントで注意書きをする
@@ -93,8 +93,8 @@ class StartAutomation(Automation):
             time.sleep(6)
 
             # コメントに被らないようにする
-            pgui.moveTo(x=100, y=100)
-            self.image_path_click(image_path=self.get_image_path('../../image/syouhinnnohensyuu.png'))
+            pgui.moveTo(x=1800, y=1100)
+            self.image_path_click(image_path=self.get_image_path('../image/syouhinnnohensyuu.png'))
             time.sleep(5)
 
             pgui.press('end')
@@ -125,30 +125,28 @@ class StartAutomation(Automation):
 
         """
         self.logger.debug("この商品をRAGEします : " + self.get_log_url())
-        # edgsの履歴表示対策
-        pgui.click(x=330, y=1530)
 
         time.sleep(1)
 
-        self.image_path_click(image_path=self.get_image_path('../../image/syouhinnnohensyuu.png'))
+        self.image_path_click(image_path=self.get_image_path('../image/syouhinnnohensyuu.png'))
         time.sleep(5)
 
         pgui.press('end')
         time.sleep(2)
 
-        self.image_locate_click(image_path=self.get_image_path('../../image/hanbaikakaku.png'))
+        self.image_locate_click(image_path=self.get_image_path('../image/hanbaikakaku.png'))
         pgui.press('end')
         pgui.write('0')
         pgui.press('enter')
         time.sleep(3)
 
-        self.image_path_click(image_path=self.get_image_path('../../image/syouhinnnohensyuu.png'))
+        self.image_path_click(image_path=self.get_image_path('../image/syouhinnnohensyuu.png'))
         time.sleep(5)
 
         pgui.press('end')
         time.sleep(2)
 
-        self.image_locate_click(image_path=self.get_image_path('../../image/hanbaikakaku.png'))
+        self.image_locate_click(image_path=self.get_image_path('../image/hanbaikakaku.png'))
         pgui.press('end')
         pgui.press('backspace')
         pgui.press('enter')
@@ -169,14 +167,14 @@ class StartAutomation(Automation):
         self.logger.info("商品ページへ移動")
 
         # 画像ありで再出品
-        self.image_path_click(image_path=self.get_image_path('../../image/mercari_copy.png'), log_flag=1)
+        self.image_path_click(image_path=self.get_image_path('../image/mercari_copy.png'), log_flag=1)
         time.sleep(8)
 
         pgui.press('pagedown')
         time.sleep(2)
         
         # 商品名を選択
-        self.image_path_click(image_path=self.get_image_path('../../image/syouhinmei.png'))
+        self.image_path_click(image_path=self.get_image_path('../image/syouhinmei.png'))
 
         # 出品する商品名をログに書き込む
         pgui.hotkey('ctrl', 'a')
@@ -193,7 +191,7 @@ class StartAutomation(Automation):
         time.sleep(5)
 
         # 出品ができていた場合
-        if self.check_page(image_path=self.get_image_path('../../image/check_relisted.png')) == True:
+        if self.check_page(image_path=self.get_image_path('../image/check_relisted.png')) == True:
             
             self.logger.info("再出品完了")            
             # コメントで注意書きをする

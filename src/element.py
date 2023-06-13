@@ -6,12 +6,11 @@ from logging import getLogger, DEBUG, Formatter, FileHandler
 
 
 class Automation(object):
-
     def __init__(self):
         pgui.FAILSAFE = True
         self.width, self.height = pgui.size()
 
-        folder_name = "log"
+        folder_name = "../log"
         file_names = ["log.txt", "log_products_name.txt"]
 
         self.create_log_files(folder_name, file_names)
@@ -26,10 +25,14 @@ class Automation(object):
                     pass
 
     def configure_loggers(self, folder_name, file_names):
-        formatter = Formatter('%(asctime)s - %(filename)s - %(funcName)s - %(message)s')
+        formatter = Formatter("%(asctime)s - %(filename)s - %(funcName)s - %(message)s")
 
-        self.logger = self.create_logger("logger", folder_name, file_names[0], formatter, DEBUG)
-        self.logger_products_name = self.create_logger("log_products_name", folder_name, file_names[1], formatter, DEBUG)
+        self.logger = self.create_logger(
+            "logger", folder_name, file_names[0], formatter, DEBUG
+        )
+        self.logger_products_name = self.create_logger(
+            "log_products_name", folder_name, file_names[1], formatter, DEBUG
+        )
 
     def create_logger(self, name, folder_name, file_name, formatter, level):
         logger = getLogger(name)
@@ -46,8 +49,6 @@ class Automation(object):
 
         return logger
 
-
-
     def get_image_path(self, image_path: str) -> str:
         """_summary_
 
@@ -63,7 +64,6 @@ class Automation(object):
             return image_path
         else:
             return image_path.replace("image/", "image_1920x1080/")
-        
 
     def calculate_screen_ratio(self) -> tuple:
         """_summary_
@@ -100,7 +100,7 @@ class Automation(object):
             wait_time (float): リロード後の待機時間（秒）
         """
         if image_path == None:
-            pgui.press('F5')
+            pgui.press("F5")
             self.logger.debug("画像が読み込めないためリロードします。")
             time.sleep(wait_time)
 
@@ -121,15 +121,16 @@ class Automation(object):
             locate = pgui.locateOnScreen(image_path, grayscale=True, confidence=0.7)
             if not locate:
                 raise pgui.ImageNotFoundException
-            
+
         except pgui.ImageNotFoundException:
-            self.logger.error(f"Error: The image {image_path} was not found on the screen.")
+            self.logger.error(
+                f"Error: The image {image_path} was not found on the screen."
+            )
             return None
 
         x, y = pgui.center(locate)
         pgui.click(x, y, duration=0.5)
         return (x, y)
-
 
     def image_path_click(self, image_path: str, log_flag: int = 0) -> tuple:
         """_summary_
@@ -149,10 +150,8 @@ class Automation(object):
         reload_count = 0
         none_page_count = 0
 
-
         # 指定した画像の座標をクリックする。
         while none_page_count <= MAX_NONE_PAGE_ATTEMPTS:
-
             locate = pgui.locateOnScreen(image_path, grayscale=True, confidence=0.7)
 
             # 画像が認識できなかったとき、再度読み込みをする
@@ -165,7 +164,7 @@ class Automation(object):
             if reload_count > MAX_RELOAD_ATTEMPTS:
                 reload_count = 0
                 none_page_count += 1
-                pgui.hotkey('ctrl', 'w')
+                pgui.hotkey("ctrl", "w")
                 self.logger.debug("3回読み込めなかったので次のタブへ移動します。")
 
         if none_page_count > MAX_NONE_PAGE_ATTEMPTS:
@@ -179,8 +178,7 @@ class Automation(object):
         pgui.click(locate, duration=0.5)
         return locate
 
-
-    def check_page(self, image_path:str) -> bool:
+    def check_page(self, image_path: str) -> bool:
         """_summary_
 
         再出品後に画面遷移が実際にできているか確認する
@@ -191,19 +189,17 @@ class Automation(object):
         if pgui.locateOnScreen(image_path, grayscale=True, confidence=0.7):
             return True
 
-
-    def page_back(self, count:int) -> None:
+    def page_back(self, count: int) -> None:
         """_summary_
-        
+
         ブラウザ上で前のページに戻る
-        
+
         Args:
             count (int): 戻るページ数
         """
         for _ in range(count):
-            pgui.hotkey('alt', 'left')
+            pgui.hotkey("alt", "left")
         self.logger.info("元の商品ページへ戻ります")
-
 
     def item_deleted(self) -> None:
         """_summary_
@@ -211,12 +207,15 @@ class Automation(object):
         商品編集画面で削除ボタンを押す。
 
         """
-        self.image_locate_click(image_path=self.get_image_path('../../image/konosyouhinwosakujosuru.png'))
+        self.image_locate_click(
+            image_path=self.get_image_path("../image/konosyouhinwosakujosuru.png")
+        )
         time.sleep(1)
 
-        self.image_locate_click(image_path=self.get_image_path('../../image/sakujosuru.png'))
+        self.image_locate_click(
+            image_path=self.get_image_path("../image/sakujosuru.png")
+        )
         time.sleep(2)
-
 
     # RAGE時の値段上昇
     def rage_up(self) -> None:
@@ -225,10 +224,10 @@ class Automation(object):
         RAGE時に値段を一桁上げる
 
         """
-        pgui.write('0')
+        pgui.write("0")
         time.sleep(0.2)
 
-        pgui.press('enter')
+        pgui.press("enter")
         time.sleep(2)
 
     def go_product_page(self) -> None:
@@ -238,18 +237,17 @@ class Automation(object):
 
         """
 
-        element : str = self.get_log_url()
-        
+        element: str = self.get_log_url()
+
         # 取引画面のとき商品ページに遷移する。商品ページの場合はそのまま。
         if "transaction" in element:
             e = element.replace("transaction", "item")
             pyper.copy(e)
-            pgui.hotkey('ctrl', 'l')
-            pgui.hotkey('ctrl', 'v')
-            pgui.press('enter')
-        
-        time.sleep(6)
+            pgui.hotkey("ctrl", "l")
+            pgui.hotkey("ctrl", "v")
+            pgui.press("enter")
 
+        time.sleep(6)
 
     def comment_product(self) -> None:
         """_summary_
@@ -257,28 +255,32 @@ class Automation(object):
         出品した商品に注意書きをコメントする。
 
         """
-        self.image_locate_click(image_path=self.get_image_path('../../image/syuppinnsyouhinwomiru.png'))
+        self.image_locate_click(
+            image_path=self.get_image_path("../image/syuppinnsyouhinwomiru.png")
+        )
         time.sleep(2)
 
-        self.image_locate_click(image_path=self.get_image_path('../../image/komentowonyuuryoku.png'))
+        self.image_locate_click(
+            image_path=self.get_image_path("../image/komentowonyuuryoku.png")
+        )
         time.sleep(3)
 
-        pgui.press('tab')
+        pgui.press("tab")
         time.sleep(1)
         self.logger.info("注意書きコメントを入力")
 
         # 設定ファイルに記載されているコメントを貼り付ける
-        with open("../../setting/comment.txt", "r", encoding="utf-8") as f:
+        with open("../setting/comment.txt", "r", encoding="utf-8") as f:
             comment = f.read()
-        
+
         pyper.copy(comment)
-        pgui.hotkey('ctrl', 'v')
+        pgui.hotkey("ctrl", "v")
         time.sleep(1)
 
         # コメントを送信する
-        pgui.hotkey('tab')
-        pgui.hotkey('tab')
-        pgui.press('enter')
+        pgui.hotkey("tab")
+        pgui.hotkey("tab")
+        pgui.press("enter")
         time.sleep(0.5)
 
     def printing_process(self) -> None:
@@ -287,14 +289,14 @@ class Automation(object):
         印刷時、前の宛名を削除してペーストする。
 
         """
-        pgui.hotkey('ctrl', 'a')
-        pgui.press('backspace')
+        pgui.hotkey("ctrl", "a")
+        pgui.press("backspace")
         time.sleep(1)
 
-        pgui.hotkey('ctrl', 'v')
-        pgui.press('backspace')
-        pgui.press('up', presses=9)
-        pgui.press('delete', presses=5)
+        pgui.hotkey("ctrl", "v")
+        pgui.press("backspace")
+        pgui.press("up", presses=9)
+        pgui.press("delete", presses=5)
 
     def choice_printing(self) -> None:
         """_summary_
@@ -302,5 +304,5 @@ class Automation(object):
         印刷するアイコンを選択する。
 
         """
-        self.image_locate_click('../../image/insatu.png')
+        self.image_locate_click("../image/insatu.png")
         time.sleep(1)

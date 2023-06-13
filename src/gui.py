@@ -28,7 +28,7 @@ class GUI(StartAutomation):
     def gui_main(self):
         auto = StartAutomation
 
-        sg.theme('DarkBlue17')
+        sg.theme('DarkGrey11')
 
         layout = self.create_layout()
 
